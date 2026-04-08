@@ -3,13 +3,26 @@ export default {
 	highlight
 };
 
+let origBoardEl;
+
+const NUM_ROWS = 8;
 
 // ****************************
 
 function draw(boardEl) {
-	// TODO: draw the chessboard, 8 rows (divs)
-	// of 8 tiles (divs) each, inserting all DOM
-	// elements into `boardEl` div
+	origBoardEl = boardEl;
+	
+    for (let i = 0; i < NUM_ROWS; i++) {
+        let rowEl = document.createElement('div');
+
+        for (let j = 0; j < NUM_ROWS; j++) {
+            let tileEl = document.createElement('div');
+
+            rowEl.appendChild(tileEl);
+        }
+
+        boardEl.appendChild(rowEl);
+    }
 }
 
 function highlight(tileEl) {
