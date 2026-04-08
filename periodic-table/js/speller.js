@@ -8,9 +8,6 @@ let symbols = {};
 
 await loadPeriodicTable();
 
-
-// ****************************
-
 async function loadPeriodicTable() {
 	elements = await (await fetch("periodic-table.json")).json();
 
@@ -23,7 +20,7 @@ function findCandidates(inputWord) {
 	const oneLetterSymbols = [];
 	const twoLetterSymbols = [];
 
-	for (let i = 0; i < inputWord; i++) {
+	for (let i = 0; i < inputWord.length; i++) {
 		// Collect all the one letter candidates
 		if (
 			inputWord[i] in symbols &&
@@ -48,31 +45,58 @@ function findCandidates(inputWord) {
 	return [ ...twoLetterSymbols, ...oneLetterSymbols ];
 }
 
-function check(inputWord) {
-	if (inputWord.length > 0) {
-		for (let element of elements) {
-			const symbol = element.symbol.toLowerCase();
+function spellWord(candidates, charsLeft) {
+	if (charsLeft.length === 0) {
+		return [];
+	}
 
-			if (symbol.length <= inputWord.length) {
-				if (inputWord.slice(0, symbol.length) === symbol) {
-					// If the word is longer than the symbol, recursively check 
-					// the rest of the word
-					if (inputWord.length > symbol.length) {
-						let res = check(inputWord.slice(symbol.length));
+	// Check for two letters symbols first
+	if (charsLeft.length >= 2) {
+		const two = charsLeft.slice(0, 2);
+		const rest = charsLeft.slice(2);
+		
+		// Found a match
+		if (candidates.includes(two)) {
+			// More characters to match
+			if (rest.length > 0) {
+				let result = [ two, ...spellWord(candidates, rest) ];
 
-						// Matched successfully
-						if (res.length > 0) {
-							return [symbol, ...res];
-						}
-					} else {
-						return [symbol];
-					}
+				if (result.join('') === charsLeft) {
+					return result;
 				}
+			} else {
+				return [two];
+			}
+		}
+	}
+
+	// Check for a one letter symbols
+	if (charsLeft.length >= 1) {
+		const one = charsLeft[0];
+		const rest = charsLeft.slice(1);
+
+		// Found a match
+		if (candidates.includes(one)) {
+			// More characters to match
+			if (rest.length > 0) {
+				let result = [ one, ...spellWord(candidates, rest) ];
+
+				if (result.join('') === charsLeft) {
+					return result;
+				}
+			} else {
+				return [one];
 			}
 		}
 	}
 
 	return [];
+}
+
+function check(inputWord) {
+	const candidates = findCandidates(inputWord);
+
+	return spellWord(candidates, inputWord);
 }
 
 function lookup(elementSymbol) {
